@@ -1,13 +1,15 @@
 from itertools import islice
 
-from analysis_pqc import params
 import numpy as np
+
+from analysis_pqc import params
 
 __all__ = [
     'num2str',
     'make_chunks',
     'PQC_Values'
 ]
+
 
 def num2str(num, basenum=None):
     if basenum is None:
@@ -21,7 +23,7 @@ def make_chunks(data, size):
     it = iter(data)
 
     for i in range(0, len(data), size):
-        yield [k for k in islice(it, size)]
+        yield list(islice(it, size))
 
 
 class PQC_Values:
@@ -69,20 +71,22 @@ class PQC_Values:
         self.values.append(val)
 
     def rearrange(self, indices):
-        self.values = [ self.values[indices[i]] for i in range(len(indices)) ]
+        self.values = [self.values[indices[i]] for i in range(len(indices))]
 
     def get_value(self, index):
         # with multiplier to suit the unit
         if index < len(self.values):
-            return self.values[index]*self.show_multiplier
+            return self.values[index] * self.show_multiplier
         else:
             stats = self.get_stats()
-            sel={0: stats.selMed,
-                 1: stats.selAvg,
-                 2: stats.selStd,
-                 3: len(stats.values),
-                 4: len(stats.values)/stats.nTot, }
-            return sel.get(index-len(self.values), "error")
+            sel = {
+                0: stats.selMed,
+                1: stats.selAvg,
+                2: stats.selStd,
+                3: len(stats.values),
+                4: len(stats.values) / stats.nTot,
+            }
+            return sel.get(index - len(self.values), "error")
 
     def get_value_string(self, index, niceText=True):
         if index < len(self.values):
@@ -90,20 +94,22 @@ class PQC_Values:
                 return "failed"
             elif np.isinf(self.values[index]) and niceText:
                 return "---"
-            return num2str(self.values[index]*self.show_multiplier, self.expected_value)
+            return num2str(self.values[index] * self.show_multiplier, self.expected_value)
         else:
             stats = self.get_stats()
-            sel={0: num2str(stats.selMed, self.expected_value),
-                 1: num2str(stats.selAvg, self.expected_value),
-                 2: num2str(stats.selStd, self.expected_value),
-                 3: "{}/{}".format(len(stats.values), stats.nTot),
-                 4: "{:3.2f}".format(len(stats.values)/stats.nTot), }
-            return sel.get(index-len(self.values), "error")
+            sel = {
+                0: num2str(stats.selMed, self.expected_value),
+                1: num2str(stats.selAvg, self.expected_value),
+                2: num2str(stats.selStd, self.expected_value),
+                3: "{}/{}".format(len(stats.values), stats.nTot),
+                4: "{:3.2f}".format(len(stats.values) / stats.nTot),
+            }
+            return sel.get(index - len(self.values), "error")
 
     def get_status(self, index):
         if index >= len(self.values):
             return 0
-        value = self.values[index]*self.show_multiplier
+        value = self.values[index] * self.show_multiplier
         if np.isinf(value):
             return 5  # inf
         elif np.isnan(value):
@@ -143,7 +149,7 @@ class PQC_Values:
         if np.sum(selector) < 2:
             return np.array([0]), 1, 1, 0, 0, 0, 0, 0, 0, 0, 0
 
-        values = np.array(self.values)[selector]*self.show_multiplier   # filter out nans
+        values = np.array(self.values)[selector] * self.show_multiplier  # filter out nans
 
         if nTot < 2:
             return values, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0
@@ -158,7 +164,7 @@ class PQC_Values:
         values = values[values > min_allowed]
         nTooLow = nTot - len(values) - nNan - nTooHigh
 
-        if (len(values)):
+        if len(values):
             selMed = np.median(values)
             selAvg = np.mean(values)
             selStd = np.std(values)
@@ -171,5 +177,5 @@ class PQC_Values:
 
     @classmethod
     def merge(new, parents, name='na', label='na'):
-        values = np.concatenate( [t.values for t in parents])
+        values = np.concatenate([t.values for t in parents])
         return new(name, label, parents[0].expected_value, parents[0].unit, parents[0].show_multiplier, values=values, stray=parents[0].stray)

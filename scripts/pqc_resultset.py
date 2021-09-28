@@ -10,8 +10,6 @@ import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib import gridspec
 
-from analysis_pqc import params
-
 import pqc_analysis_json as pqc
 from pqc_values import PQC_Values, make_chunks
 from pqc_analysis_json import AnalysisOptions
@@ -21,12 +19,14 @@ __all__ = [
     'PQC_resultset'
 ]
 
+
 class Histogram:
 
     def __init__(self, filename, *, title=None, description=None):
         self.filename = filename
         self.title = title or ""
         self.description = description or ""
+
 
 class PQC_resultset:
 
@@ -38,9 +38,9 @@ class PQC_resultset:
         self.flutes = []
         self.timestamps = []
         self.basepath = ''
-        self.output_dir = None # TODO
-        self.plot_dir = None # TODO
-        self.histogram_dir = None # TODO
+        self.output_dir = None  # TODO
+        self.plot_dir = None  # TODO
+        self.histogram_dir = None  # TODO
         self.histograms = []
 
         if dataseries is None:
@@ -135,7 +135,7 @@ class PQC_resultset:
     def sort_by_time(self):
         # TODO remove placeholders
         order = np.argsort([t for t in self.timestamps if t])
-        #print(str(order))
+        # print(str(order))
 
         for key in self.dataseries:
             if type(self.dataseries[key]) is PQC_Values:
@@ -145,9 +145,9 @@ class PQC_resultset:
 
     # warning: this creates not full copies, only the dict is available then
     def split(self, junk_size):
-        #print(str((self.dataseries["vdp_n_f"]).split(junk_size)))
+        # print(str((self.dataseries["vdp_n_f"]).split(junk_size)))
 
-        #ret = [PQC_resultset( self.value=i) for i in make_chunks(self.value, junk_size)]
+        # ret = [PQC_resultset( self.value=i) for i in make_chunks(self.value, junk_size)]
         ret = [None] * len(self.dataseries["vdp_n_f"].split(junk_size))
 
         for i in range(0, len(ret)):
@@ -401,18 +401,18 @@ class PQC_resultset:
             self.analyze_sample(sample_path, create_plots=create_plots, force_eval=force_eval)
 
         self.dataseries['xlabels'].extend(PQC_Values.get_stats_labels())
-        self.dataseries['xflutes'].extend([""]*len(PQC_Values.get_stats_labels()))
-        self.dataseries['xtimestamps'].extend([""]*len(PQC_Values.get_stats_labels()))
+        self.dataseries['xflutes'].extend([""] * len(PQC_Values.get_stats_labels()))
+        self.dataseries['xtimestamps'].extend([""] * len(PQC_Values.get_stats_labels()))
 
     def statusbar(self, pqc_value_statistics, axes, single=True, start=-0.5, stop=0.5, label=''):
-        relOK = len(pqc_value_statistics.values)/pqc_value_statistics.nTot
-        relNan = pqc_value_statistics.nNan/pqc_value_statistics.nTot
-        relTooHigh = pqc_value_statistics.nTooHigh/pqc_value_statistics.nTot
-        relTooLow = pqc_value_statistics.nTooLow/pqc_value_statistics.nTot
+        relOK = len(pqc_value_statistics.values) / pqc_value_statistics.nTot
+        relNan = pqc_value_statistics.nNan / pqc_value_statistics.nTot
+        relTooHigh = pqc_value_statistics.nTooHigh / pqc_value_statistics.nTot
+        relTooLow = pqc_value_statistics.nTooLow / pqc_value_statistics.nTot
 
         average_delta = (start - stop) / 2
         center = stop + average_delta
-        width = stop-start
+        width = stop - start
         if single:
             alpha = 1.
         else:
@@ -431,11 +431,11 @@ class PQC_resultset:
         if single or label:
             axes.text(center, relOK - minthreshhold / 2, 'OK', horizontalalignment='center', verticalalignment='top')
             if relNan > minthreshhold:
-                axes.text(center, relOK + relNan-minthreshhold / 2, 'Failed', horizontalalignment='center', verticalalignment='top')
+                axes.text(center, relOK + relNan - minthreshhold / 2, 'Failed', horizontalalignment='center', verticalalignment='top')
             if relTooHigh > minthreshhold:
-                axes.text(center, relOK + relNan + relTooHigh-minthreshhold / 2, 'High', horizontalalignment='center', verticalalignment='top')
+                axes.text(center, relOK + relNan + relTooHigh - minthreshhold / 2, 'High', horizontalalignment='center', verticalalignment='top')
             if relTooLow > minthreshhold:
-                axes.text(center, relOK + relNan + relTooHigh + relTooLow-minthreshhold / 2, 'Low', horizontalalignment='center', verticalalignment='top')
+                axes.text(center, relOK + relNan + relTooHigh + relTooLow - minthreshhold / 2, 'Low', horizontalalignment='center', verticalalignment='top')
 
         axes.text(center, 0.01, label, horizontalalignment='center', verticalalignment='bottom')
 
@@ -444,7 +444,6 @@ class PQC_resultset:
         if single:
             plt.xticks([])
             plt.xlim([start, stop])
-
 
     def histogram(self, pqc_values, path, stray=1.4, range_extension=None):
         # Plot stats
@@ -465,7 +464,7 @@ class PQC_resultset:
         # Plot title
         if range_extension is not None:
             title = f"{self.batch}: {pqc_values.label}, Ext: {range_extension:5.1E}"
-            plt.ticklabel_format(axis='x', style='sci', scilimits=(-2,2))
+            plt.ticklabel_format(axis='x', style='sci', scilimits=(-2, 2))
         else:
             title = f"{self.batch}: {pqc_values.label}"
         plt.title(title, fontsize=18)
@@ -474,36 +473,35 @@ class PQC_resultset:
 
         # Plot description
         if range_extension is not None:
-            #ax0.hist(pqc_values.value, bins=50, facecolor='blueviolet', alpha=1, edgecolor='black', linewidth=1)
-            ax0.hist(stats.values, bins=50, range=[0, pqc_values.max_allowed*range_extension], facecolor='blueviolet', alpha=1, edgecolor='black', linewidth=1)
-            descNum = "Total: {}\nShown: {}\nFailed: {}\nToo high: {}\nToo low: {}".format(stats.nTot, len(stats.values),  stats.nNan, stats.nTooHigh, stats.nTooLow)
+            # ax0.hist(pqc_values.value, bins=50, facecolor='blueviolet', alpha=1, edgecolor='black', linewidth=1)
+            ax0.hist(stats.values, bins=50, range=[0, pqc_values.max_allowed * range_extension], facecolor='blueviolet', alpha=1, edgecolor='black', linewidth=1)
+            descNum = "Total: {}\nShown: {}\nFailed: {}\nToo high: {}\nToo low: {}".format(stats.nTot, len(stats.values), stats.nNan, stats.nTooHigh, stats.nTooLow)
         else:
             ax0.hist(stats.values, bins=20, range=[pqc_values.min_allowed, pqc_values.max_allowed], facecolor='blue', alpha=1, edgecolor='black', linewidth=1)
-            descNum = "Total: {}\nShown: {}\nFailed: {}\nToo high: {}\nToo low: {}".format(stats.nTot, len(stats.values),  stats.nNan, stats.nTooHigh, stats.nTooLow)
+            descNum = "Total: {}\nShown: {}\nFailed: {}\nToo high: {}\nToo low: {}".format(stats.nTot, len(stats.values), stats.nNan, stats.nTooHigh, stats.nTooLow)
 
         ax0.set_xlabel(pqc_values.unit)
         ax0.set_ylabel("occurences")
 
-        #descNum = "Total number: {}\nShown: {:2.0f}%, {}\nFailed: {:2.0f}%, {}\nToo high: {:2.0f}%, {}\nToo low: {:2.0f}%, {}".format(stats.nTot, len(stats.values)/stats.nTot*1e2, len(stats.values), stats.nNan/stats.nTot*1e2, stats.nNan, stats.nTooHigh/stats.nTot*1e2, stats.nTooHigh, stats.nTooLow/stats.nTot*1e2, stats.nTooLow)
+        # descNum = "Total number: {}\nShown: {:2.0f}%, {}\nFailed: {:2.0f}%, {}\nToo high: {:2.0f}%, {}\nToo low: {:2.0f}%, {}".format(stats.nTot, len(stats.values)/stats.nTot*1e2, len(stats.values), stats.nNan/stats.nTot*1e2, stats.nNan, stats.nTooHigh/stats.nTot*1e2, stats.nTooHigh, stats.nTooLow/stats.nTot*1e2, stats.nTooLow)
 
         fig.text(0.83, 0.85, descNum, bbox=dict(facecolor='red', alpha=0.6), horizontalalignment='right', verticalalignment='top')
 
         if abs(stats.selMed) < 9.99:
             descStat = f"Total median: {stats.totMed:8.2f} {pqc_values.unit}\n"
-            descStat = descStat +"Selected avg: {0:8.2f} {3}\nSel median: {2:8.2f} {3}\nSelected Std: {1:8.2f} {3}".format(stats.selAvg, stats.selStd, stats.selMed, pqc_values.unit)
+            descStat = descStat + "Selected avg: {0:8.2f} {3}\nSel median: {2:8.2f} {3}\nSelected Std: {1:8.2f} {3}".format(stats.selAvg, stats.selStd, stats.selMed, pqc_values.unit)
         elif abs(stats.totAvg) < 1e6:
             descStat = f"Total median: {stats.totMed:8.1f} {pqc_values.unit}\n"
-            descStat = descStat +"Selected avg: {0:8.1f} {3}\nSel median: {2:8.1f} {3}\nSelected Std: {1:8.1f} {3}".format(stats.selAvg, stats.selStd, stats.selMed, pqc_values.unit)
+            descStat = descStat + "Selected avg: {0:8.1f} {3}\nSel median: {2:8.1f} {3}\nSelected Std: {1:8.1f} {3}".format(stats.selAvg, stats.selStd, stats.selMed, pqc_values.unit)
         else:
             descStat = "Total avg: {0:9.2E} {4}\nTotal median: {1:9.2E} {4}\nSelected avg: {2:9.2E} {4}\nSel median: {3:9.2E} {4}".format(stats.totAvg, stats.totMed, stats.selAvg, stats.selMed, pqc_values.unit)
         fig.text(0.45, 0.85, descStat, bbox=dict(facecolor='yellow', alpha=0.85), horizontalalignment='right', verticalalignment='top')
 
-        #for i in [(stats.totAvg, 'purple', 'solid'), (stats.totMed, 'purple', 'dashed'), (stats.selAvg, 'green', 'solid'), (stats.selMed, 'green', 'dashed')]:
-        #    if (i[0] < pqc_values.max_allowed) and (i[0] > pqc_values.min_allowed):
-        #        ax0.vlines(x = i[0], ymin = 0, ymax = 3,
-        #            colors = i[1], linestyles=i[2],
-        #            label = 'vline_multiple - full height')
-
+        # for i in [(stats.totAvg, 'purple', 'solid'), (stats.totMed, 'purple', 'dashed'), (stats.selAvg, 'green', 'solid'), (stats.selMed, 'green', 'dashed')]:
+        #     if (i[0] < pqc_values.max_allowed) and (i[0] > pqc_values.min_allowed):
+        #         ax0.vlines(x = i[0], ymin = 0, ymax = 3,
+        #             colors = i[1], linestyles=i[2],
+        #             label = 'vline_multiple - full height')
 
         self.statusbar(stats, ax1)
 
@@ -517,7 +515,7 @@ class PQC_resultset:
 
         # Append histogram to resultset
         self.histograms.append(Histogram(
-            os.path.relpath(filename, self.output_dir), # relative path for urls
+            os.path.relpath(filename, self.output_dir),  # relative path for urls
             title=title,
             description=descNum
         ))
@@ -555,7 +553,7 @@ class PQC_resultset:
     def create_histograms(self):
         matplotlib.rcParams.update({'font.size': 14})
 
-        histogram_dir = outdir = os.path.join(self.output_dir, "histograms")
+        histogram_dir = os.path.join(self.output_dir, "histograms")
 
         for key in self.dataseries:
             if not key.startswith('x'):
@@ -572,7 +570,7 @@ class PQC_resultset:
     def short_label(self, i):
         fl = "x"
         try:
-            lbl_list = [2,5]
+            lbl_list = [2, 5]
             if "Left" in self.flutes[i]:
                 fl = " L"
             elif "Right" in self.flutes[i]:
@@ -584,7 +582,7 @@ class PQC_resultset:
             else:
                 fl = " err"
             return ' '.join([self.labels[i].split('_')[j] for j in lbl_list]) + fl
-        except:
+        except Exception:
             return self.labels[i] + fl
 
     def short_batch(self, vpx=True):
@@ -593,4 +591,4 @@ class PQC_resultset:
         if vpx:
             return s
         else:
-            return re.sub(r'VPX','', s)
+            return re.sub(r'VPX', '', s)
